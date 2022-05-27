@@ -115,7 +115,6 @@ const run = async () => {
     /** user insert using put method */
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
       const user = req.body;
       const filter = { email };
       const option = { upsert: true };
@@ -127,6 +126,14 @@ const run = async () => {
         expiresIn: "1d",
       });
       res.send({ result, token });
+    });
+
+    /** get all user */
+    app.get("/user", async (req, res) => {
+      const query = {};
+      const cursor = userCollection.find(query);
+      const user = await cursor.toArray();
+      res.send(user);
     });
   } finally {
     //nothing to be happen here

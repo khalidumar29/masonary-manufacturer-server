@@ -135,6 +135,17 @@ const run = async () => {
       const user = await cursor.toArray();
       res.send(user);
     });
+
+    /** make an user admin */
+    app.put("/user/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email };
+      const updateDoc = {
+        $set: { role: "admin" },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
   } finally {
     //nothing to be happen here
   }

@@ -76,7 +76,7 @@ const run = async () => {
     });
 
     /**get order */
-    app.get("/order", async (req, res) => {
+    app.get("/order", verifyJwt, async (req, res) => {
       const query = {};
       const cursor = orderCollection.find(query);
       const order = await cursor.toArray();
@@ -114,7 +114,7 @@ const run = async () => {
     });
 
     /** get review */
-    app.get("/review", async (req, res) => {
+    app.get("/review", verifyJwt, async (req, res) => {
       const query = {};
       const cursor = reviewCollection.find(query);
       const review = await cursor.toArray();
@@ -138,7 +138,7 @@ const run = async () => {
     });
 
     /** get all user */
-    app.get("/user", async (req, res) => {
+    app.get("/user", verifyJwt, async (req, res) => {
       const query = {};
       const cursor = userCollection.find(query);
       const user = await cursor.toArray();

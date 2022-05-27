@@ -53,7 +53,7 @@ const run = async () => {
     const paymentCollection = client.db("manufactuer").collection("payments");
 
     /**get all products */
-    app.get("/products", verifyJwt, async (req, res) => {
+    app.get("/products", async (req, res) => {
       const query = {};
       const cursor = productCollection.find(query);
       const products = await cursor.toArray();
@@ -114,7 +114,7 @@ const run = async () => {
     });
 
     /** get review */
-    app.get("/review", verifyJwt, async (req, res) => {
+    app.get("/review", async (req, res) => {
       const query = {};
       const cursor = reviewCollection.find(query);
       const review = await cursor.toArray();

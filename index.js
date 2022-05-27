@@ -138,7 +138,7 @@ const run = async () => {
     });
 
     /** get all user */
-    app.get("/user", verifyJwt, async (req, res) => {
+    app.get("/user", async (req, res) => {
       const query = {};
       const cursor = userCollection.find(query);
       const user = await cursor.toArray();

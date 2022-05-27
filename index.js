@@ -76,7 +76,7 @@ const run = async () => {
     });
 
     /**get order */
-    app.get("/order", verifyJwt, async (req, res) => {
+    app.get("/order", async (req, res) => {
       const query = {};
       const cursor = orderCollection.find(query);
       const order = await cursor.toArray();

@@ -58,6 +58,13 @@ const run = async () => {
       res.send(products);
     });
 
+    /** post products */
+    app.post("/products", async (req, res) => {
+      const products = req.body;
+      const result = await productCollection.insertOne(products);
+      res.send(result);
+    });
+
     /** get product by id */
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;

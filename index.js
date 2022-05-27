@@ -14,7 +14,7 @@ app.use(express.json());
 /** middleware */
 app.use(cors());
 app.use(express());
-
+//
 /** jwt token verigication */
 const verifyJwt = (req, res, next) => {
   const authHeader = req.headers.authorization;

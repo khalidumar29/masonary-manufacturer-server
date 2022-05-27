@@ -2,6 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const stripe = require("stripe")(process.env.STRIPE_SECRATE_KEY);
 const app = express();
 const port = process.env.PORT || 5000;
 const jwt = require("jsonwebtoken");
@@ -49,9 +50,10 @@ const run = async () => {
     const userCollection = client.db("manufactuer").collection("user");
     const orderCollection = client.db("manufactuer").collection("orders");
     const reviewCollection = client.db("manufactuer").collection("review");
+    const paymentCollection = client.db("manufactuer").collection("payments");
 
     /**get all products */
-    app.get("/products", async (req, res) => {
+    app.get("/products", verifyJwt, async (req, res) => {
       const query = {};
       const cursor = productCollection.find(query);
       const products = await cursor.toArray();
@@ -81,6 +83,14 @@ const run = async () => {
       res.send(order);
     });
 
+    /** get order using id */
+    app.get("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const order = await orderCollection.findOne(query);
+      res.send(order);
+    });
+
     /** add order */
     app.post("/order", async (req, res) => {
       const order = req.body;
@@ -91,7 +101,6 @@ const run = async () => {
     /** delete products by id */
     app.delete("/order/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
       const query = { _id: ObjectId(id) };
       const result = await orderCollection.deleteOne(query);
       res.send(result);
@@ -136,6 +145,30 @@ const run = async () => {
       res.send(user);
     });
 
+    /** verify admin */
+    app.get("/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = await userCollection.findOne({ email });
+      const isAdmin = user.role === "admin";
+      res.send({ admin: isAdmin });
+    });
+
+    /** payment informtion update */
+    app.patch("/order/:id", async (req, res) => {
+      const id = req.params;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          paid: true,
+          trxid: payment.trxid,
+        },
+      };
+      const result = await paymentCollection.insertOne(payment);
+      const updateBooking = await orderCollection.updateOne(filter, updateDoc);
+      res.send(updateBooking);
+    });
+
     /** make an user admin */
     app.put("/user/admin/:email", async (req, res) => {
       const email = req.params.email;
@@ -145,6 +178,18 @@ const run = async () => {
       };
       const result = await userCollection.updateOne(filter, updateDoc);
       res.send(result);
+    });
+
+    /** payment itent api */
+    app.post("/create-payment-intent", async (req, res) => {
+      const { orderPrice } = req.body;
+      const amount = orderPrice * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+      res.send({ clientSecret: paymentIntent.client_secret });
     });
   } finally {
     //nothing to be happen here
